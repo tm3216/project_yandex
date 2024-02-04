@@ -51,8 +51,6 @@ class Border(pygame.sprite.Sprite):
                 self.add(sliders)
                 self.image = pygame.Surface([1, y2 - y1])
                 self.rect = pygame.Rect(x1, y1, 1, y2 - y1)
-                self.is_up = self.is_down = False
-                self.ai_fl = True
             else:
                 self.add(vertical_borders)
                 self.image = pygame.Surface([1, y2 - y1])
@@ -74,12 +72,13 @@ class Border(pygame.sprite.Sprite):
         print(self.rect.y)
 
     def ai(self):
-        if self.ai_fl:
+        if ball.vx < 0:
             if ball.vy > 0:
                 self.dwn()
             else:
                 self.up()
-        self.ai_fl = not self.ai_fl
+        else:
+            self.up()
 
 
 if __name__ == '__main__':
@@ -97,7 +96,7 @@ if __name__ == '__main__':
     ball = Ball(20, 100, 100)
     f_up = f_dwn = False
     running = True
-    ai = True
+    ai = 0
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -117,7 +116,11 @@ if __name__ == '__main__':
         screen.fill('white')
         all_sprites.draw(screen)
         balls.update()
-        slider_l.ai()
+        if ai == 2:
+            ai = 0
+            slider_l.ai()
+        else:
+            ai += 1
         clock.tick(fps)
         pygame.display.flip()
     pygame.quit()
