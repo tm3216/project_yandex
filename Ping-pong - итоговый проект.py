@@ -16,8 +16,8 @@ class Ball(pygame.sprite.Sprite):
         pygame.draw.circle(self.image, pygame.Color("red"),
                            (radius, radius), radius)
         self.rect = pygame.Rect(x, y, 2 * radius, 2 * radius)
-        self.vx = random.choice((-5, 5))
-        self.vy = random.choice((-5, 5))
+        self.vx = random.choice((-10, 10))
+        self.vy = random.choice((-10, 10))
         self.score_left = 0
         self.score_right = 0
         balls.add(self)
@@ -52,6 +52,7 @@ class Border(pygame.sprite.Sprite):
                 self.image = pygame.Surface([1, y2 - y1])
                 self.rect = pygame.Rect(x1, y1, 1, y2 - y1)
                 self.is_up = self.is_down = False
+                self.ai_fl = True
             else:
                 self.add(vertical_borders)
                 self.image = pygame.Surface([1, y2 - y1])
@@ -63,24 +64,22 @@ class Border(pygame.sprite.Sprite):
             self.rect = pygame.Rect(x1, y1, x2 - x1, 1)
 
     def up(self):
-        if pygame.sprite.spritecollideany(self, horizontal_borders):
-            if self.is_down:
-                self.rect = self.rect.move(0, -25)
-                self.is_down = False
-            else:
-                self.is_up = True
-        else:
+        if self.rect.y > 0:
             self.rect = self.rect.move(0, -25)
+        print(self.rect.y)
 
     def dwn(self):
-        if pygame.sprite.spritecollideany(self, horizontal_borders):
-            if self.is_up:
-                self.rect = self.rect.move(0, 25)
-                self.is_up = False
-            else:
-                self.is_down = True
-        else:
+        if self.rect.y < 900:
             self.rect = self.rect.move(0, 25)
+        print(self.rect.y)
+
+    def ai(self):
+        if self.ai_fl:
+            if ball.vy > 0:
+                self.dwn()
+            else:
+                self.up()
+        self.ai_fl = not self.ai_fl
 
 
 if __name__ == '__main__':
@@ -95,9 +94,10 @@ if __name__ == '__main__':
     Border(width - 5, 5, width - 5, height - 5, False, False)
     slider_l = Border(100, 450, 100, height - 450, True, True)
     slider_r = Border(width - 100, 450, width - 100, height - 450, True, True)
-    Ball(20, 100, 100)
+    ball = Ball(20, 100, 100)
     f_up = f_dwn = False
     running = True
+    ai = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -117,6 +117,7 @@ if __name__ == '__main__':
         screen.fill('white')
         all_sprites.draw(screen)
         balls.update()
+        slider_l.ai()
         clock.tick(fps)
         pygame.display.flip()
     pygame.quit()
