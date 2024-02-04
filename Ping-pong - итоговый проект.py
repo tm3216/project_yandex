@@ -1,4 +1,8 @@
-import pygame, random
+import sys
+
+import pygame
+import random
+import pygame_menu
 
 all_sprites = pygame.sprite.Group()
 balls = pygame.sprite.Group()
@@ -71,9 +75,9 @@ class Border(pygame.sprite.Sprite):
             self.rect = self.rect.move(0, 25)
         print(self.rect.y)
 
-    def ai(self):
-        if ball.vx < 0:
-            if ball.vy > 0:
+    def ai(self, x, y):
+        if x < 0:
+            if y > 0:
                 self.dwn()
             else:
                 self.up()
@@ -81,19 +85,16 @@ class Border(pygame.sprite.Sprite):
             self.up()
 
 
-if __name__ == '__main__':
-    pygame.init()
-    size = width, height = 2050, 1079
-    screen = pygame.display.set_mode(size)
+def start():
     fps = 60
     clock = pygame.time.Clock()
     Border(5, 5, width - 5, 5, False, False)
     Border(5, height - 5, width - 5, height - 5, False, False)
     Border(5, 5, 5, height - 5, False, True)
     Border(width - 5, 5, width - 5, height - 5, False, False)
+    ball = Ball(20, 100, 100)
     slider_l = Border(100, 450, 100, height - 450, True, True)
     slider_r = Border(width - 100, 450, width - 100, height - 450, True, True)
-    ball = Ball(20, 100, 100)
     f_up = f_dwn = False
     running = True
     ai = 0
@@ -118,9 +119,24 @@ if __name__ == '__main__':
         balls.update()
         if ai == 2:
             ai = 0
-            slider_l.ai()
+            slider_l.ai(ball.vx, ball.vy)
         else:
             ai += 1
         clock.tick(fps)
         pygame.display.flip()
     pygame.quit()
+
+def set_player(*args):
+    pass
+
+if __name__ == '__main__':
+    pygame.init()
+    size = width, height = 2050, 1079
+    screen = pygame.display.set_mode(size)
+    menu = pygame_menu.Menu('Welcome', 1280, 720,
+                            theme=pygame_menu.themes.THEME_BLUE)
+    menu.add.selector('Соперник:', [('Человек', 1), ('Машина', 2)], onchange=set_player)
+    menu.add.text_input('До скольки играем:', default='0')
+    menu.add.button('Играть', start)
+    menu.add.button('Выход', pygame_menu.events.EXIT)
+    menu.mainloop(screen)
