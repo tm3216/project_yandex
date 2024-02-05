@@ -84,6 +84,7 @@ class Border(pygame.sprite.Sprite):
         else:
             self.up()
 
+
 def init():
     fps = 60
     clock = pygame.time.Clock()
@@ -91,12 +92,13 @@ def init():
     Border(5, height - 5, width - 5, height - 5, False, False)
     Border(5, 5, 5, height - 5, False, True)
     Border(width - 5, 5, width - 5, height - 5, False, False)
-    ball = Ball(20, 100, 100)
+    ball = Ball(20, 1025, 539)
     slider_l = Border(100, 450, 100, height - 450, True, True)
     slider_r = Border(width - 100, 450, width - 100, height - 450, True, True)
     f_up = f_dwn = False
     running = True
     return ball, slider_r, slider_l, f_up, f_dwn, running, fps, clock
+
 
 def start():
     ball, slider_r, slider_l, f_up, f_dwn, running, fps, clock = init()
@@ -165,6 +167,7 @@ def start_with_player(*args):
         clock.tick(fps)
         pygame.display.flip()
     pygame.quit()
+
 
 def for_useless_button():
     pass
