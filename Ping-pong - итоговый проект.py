@@ -35,15 +35,18 @@ class Ball(pygame.sprite.Sprite):
         self.rect = self.rect.move(self.vx, self.vy)
         if pygame.sprite.spritecollideany(self, horizontal_borders):
             self.vy = -self.vy
-        if pygame.sprite.spritecollideany(self, vertical_borders):
+        elif pygame.sprite.spritecollideany(self, vertical_borders):
             if pygame.sprite.spritecollideany(self, vertical_borders).is_left:
                 self.vx = -self.vx
                 self.score_left += 1
             else:
                 self.vx = -self.vx
                 self.score_right += 1
-        if pygame.sprite.spritecollideany(self, sliders):
-            self.vx = -self.vx
+        elif pygame.sprite.spritecollideany(self, sliders):
+            if pygame.sprite.spritecollideany(self, sliders).is_left and self.vx < 0:
+                self.vx = -self.vx
+            elif not pygame.sprite.spritecollideany(self, sliders).is_left and self.vx > 0:
+                self.vx = -self.vx
 
 
 class Border(pygame.sprite.Sprite):
@@ -55,6 +58,7 @@ class Border(pygame.sprite.Sprite):
                 self.add(sliders)
                 self.image = pygame.Surface([1, y2 - y1])
                 self.rect = pygame.Rect(x1, y1, 1, y2 - y1)
+                self.is_left = is_left
             else:
                 self.add(vertical_borders)
                 self.image = pygame.Surface([1, y2 - y1])
@@ -94,7 +98,7 @@ def init():
     Border(width - 5, 5, width - 5, height - 5, False, False)
     ball = Ball(20, 1025, 539)
     slider_l = Border(100, 450, 100, height - 450, True, True)
-    slider_r = Border(width - 100, 450, width - 100, height - 450, True, True)
+    slider_r = Border(width - 100, 450, width - 100, height - 450, True, False)
     f_up = f_dwn = False
     running = True
     return ball, slider_r, slider_l, f_up, f_dwn, running, fps, clock
@@ -179,7 +183,8 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode(size)
     mytheme = pygame_menu.Theme(background_color=(255, 255, 255, 255), title_background_color=(255, 0, 0), title_font_shadow=True)
     menu = pygame_menu.Menu('Welcome', 2050, 1079, theme=mytheme)
-    menu.add.button('эта кнопка не видна и ничего не делает, но без неё меню не работает', for_useless_button)
+    menu.add.button('', for_useless_button)
+    # эта кнопка не видна и ничего не делает, но без неё меню не работает
     menu.add.button('Играть с машиной', start)
     menu.add.button('Играть с человеком', start_with_player)
     menu.add.button('Выход', pygame_menu.events.EXIT)
