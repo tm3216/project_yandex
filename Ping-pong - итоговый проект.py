@@ -84,8 +84,7 @@ class Border(pygame.sprite.Sprite):
         else:
             self.up()
 
-
-def start():
+def init():
     fps = 60
     clock = pygame.time.Clock()
     Border(5, 5, width - 5, 5, False, False)
@@ -97,6 +96,10 @@ def start():
     slider_r = Border(width - 100, 450, width - 100, height - 450, True, True)
     f_up = f_dwn = False
     running = True
+    return ball, slider_r, slider_l, f_up, f_dwn, running, fps, clock
+
+def start():
+    ball, slider_r, slider_l, f_up, f_dwn, running, fps, clock = init()
     ai = 0
     while running:
         for event in pygame.event.get():
@@ -127,7 +130,43 @@ def start():
     pygame.quit()
 
 
-def set_player(*args):
+def start_with_player(*args):
+    ball, slider_r, slider_l, f_up, f_dwn, running, fps, clock = init()
+    k_up = k_dwn = False
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    f_up = True
+                elif event.key == pygame.K_DOWN:
+                    f_dwn = True
+                elif event.key == pygame.K_w:
+                    k_up = True
+                elif event.key == pygame.K_s:
+                    k_dwn = True
+            elif event.type == pygame.KEYUP:
+                if event.key in [pygame.K_UP, pygame.K_DOWN]:
+                    f_up = f_dwn = False
+                elif event.key in [pygame.K_w, pygame.K_s]:
+                    k_up = k_dwn = False
+        if f_up:
+            slider_r.up()
+        elif f_dwn:
+            slider_r.dwn()
+        if k_up:
+            slider_l.up()
+        elif k_dwn:
+            slider_l.dwn()
+        screen.fill('white')
+        all_sprites.draw(screen)
+        balls.update()
+        clock.tick(fps)
+        pygame.display.flip()
+    pygame.quit()
+
+def for_useless_button():
     pass
 
 
@@ -137,7 +176,8 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode(size)
     mytheme = pygame_menu.Theme(background_color=(255, 255, 255, 255), title_background_color=(255, 0, 0), title_font_shadow=True)
     menu = pygame_menu.Menu('Welcome', 2050, 1079, theme=mytheme)
-    menu.add.button('Играть с человеком', start)
+    menu.add.button('эта кнопка не видна и ничего не делает, но без неё меню не работает', for_useless_button)
     menu.add.button('Играть с машиной', start)
+    menu.add.button('Играть с человеком', start_with_player)
     menu.add.button('Выход', pygame_menu.events.EXIT)
     menu.mainloop(screen)
