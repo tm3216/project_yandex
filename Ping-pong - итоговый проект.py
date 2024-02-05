@@ -126,17 +126,18 @@ def start():
         pygame.display.flip()
     pygame.quit()
 
+
 def set_player(*args):
     pass
+
 
 if __name__ == '__main__':
     pygame.init()
     size = width, height = 2050, 1079
     screen = pygame.display.set_mode(size)
-    menu = pygame_menu.Menu('Welcome', 1280, 720,
-                            theme=pygame_menu.themes.THEME_BLUE)
-    menu.add.selector('Соперник:', [('Человек', 1), ('Машина', 2)], onchange=set_player)
-    menu.add.text_input('До скольки играем:', default='0')
-    menu.add.button('Играть', start)
+    mytheme = pygame_menu.Theme(background_color=(255, 255, 255, 255), title_background_color=(255, 0, 0), title_font_shadow=True)
+    menu = pygame_menu.Menu('Welcome', 2050, 1079, theme=mytheme)
+    menu.add.button('Играть с человеком', start)
+    menu.add.button('Играть с машиной', start)
     menu.add.button('Выход', pygame_menu.events.EXIT)
     menu.mainloop(screen)
