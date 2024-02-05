@@ -25,17 +25,18 @@ class Ball(pygame.sprite.Sprite):   # класс мяча
         self.sound = pygame.mixer.Sound('Sound_knock.mp3')
         self.sound.set_volume(0.3)
         file = open('record.txt', 'r')
-        self.records = list(file.read())
+        self.records = file.read().split(';')
         print(self.records)
-        file.close()
+        if len(self.records) == 0:
+            self.records = [0, 0]
         balls.add(self)
 
     def update(self):
         font = pygame.font.Font(None, 50)
-        text_l = font.render(f'{str(self.score_left)} рекорд:{self.records[1]}', True, (100, 255, 100))
+        text_l = font.render(f'{str(self.score_left)}    рекорд:{self.records[1]}', True, (100, 255, 100))
         screen.blit(text_l, (60, 10))
-        text_r = font.render(f'рекорд:{self.records[0]} {str(self.score_right)}', True, (100, 255, 100))
-        screen.blit(text_r, (1570, 10))     # отрисовка счёта
+        text_r = font.render(f'рекорд:{self.records[0]}     {str(self.score_right)}', True, (100, 255, 100))
+        screen.blit(text_r, (1770, 10))     # отрисовка счёта
         self.rect = self.rect.move(self.vx, self.vy)
         if pygame.sprite.spritecollideany(self, horizontal_borders):    # столкновение с границей поля
             self.vy = -self.vy
@@ -205,15 +206,17 @@ def start_with_player(*args):   # игра с человеком
         balls.update()
         clock.tick(fps)
         pygame.display.flip()
+
     with open("record.txt", "r+") as f:
         lines = f.readlines()
         f.seek(0)
         for line in lines:
-            records = list(line)
+            records = line.split(';')
             if ball.score_right > int(records[0]):
-                f.write(str(ball.score_right) + str(records[1]))
+                records[0] = ball.score_right
             if ball.score_left > int(records[1]):
-                f.write(str(records[0]) + str(ball.score_left))
+                records[1] = ball.score_left
+            f.write(f'{str(records[0])};{str(records[1])}')
         f.truncate()
     pygame.quit()
 
