@@ -5,13 +5,13 @@ import random
 import pygame_menu
 
 all_sprites = pygame.sprite.Group()
-balls = pygame.sprite.Group()
+balls = pygame.sprite.Group()    # игрок
 horizontal_borders = pygame.sprite.Group()
-vertical_borders = pygame.sprite.Group()
+vertical_borders = pygame.sprite.Group()    # границы
 sliders = pygame.sprite.Group()
 
 
-class Ball(pygame.sprite.Sprite):
+class Ball(pygame.sprite.Sprite):   # класс мяча
     def __init__(self, radius, x, y):
         super().__init__(all_sprites)
         self.radius = radius
@@ -21,9 +21,11 @@ class Ball(pygame.sprite.Sprite):
                            (radius, radius), radius)
         self.rect = pygame.Rect(x, y, 2 * radius, 2 * radius)
         self.vx = random.choice((-10, 10))
-        self.vy = random.choice((-10, 10))
+        self.vy = random.choice((-10, 10))    # направление мяча
         self.score_left = 0
-        self.score_right = 0
+        self.score_right = 0    # счёт
+        self.sound = pygame.mixer.Sound('Sound_knock.mp3')
+        self.sound.set_volume(0.5)
         balls.add(self)
 
     def update(self):
@@ -31,55 +33,59 @@ class Ball(pygame.sprite.Sprite):
         text_l = font.render(str(self.score_left), True, (100, 255, 100))
         screen.blit(text_l, (50, 10))
         text_r = font.render(str(self.score_right), True, (100, 255, 100))
-        screen.blit(text_r, (2000, 10))
+        screen.blit(text_r, (2000, 10))     # отрисовка счёта
         self.rect = self.rect.move(self.vx, self.vy)
-        if pygame.sprite.spritecollideany(self, horizontal_borders):
+        if pygame.sprite.spritecollideany(self, horizontal_borders):    # столкновение с границей поля
             self.vy = -self.vy
-        elif pygame.sprite.spritecollideany(self, vertical_borders):
+            self.sound.play()
+        elif pygame.sprite.spritecollideany(self, vertical_borders):    # обновление счёта
             if pygame.sprite.spritecollideany(self, vertical_borders).is_left:
                 self.vx = -self.vx
                 self.score_left += 1
+                self.sound.play()
             else:
                 self.vx = -self.vx
                 self.score_right += 1
-        elif pygame.sprite.spritecollideany(self, sliders):
+                self.sound.play()
+        elif pygame.sprite.spritecollideany(self, sliders):    # столкновение с игроком
             if pygame.sprite.spritecollideany(self, sliders).is_left and self.vx < 0:
                 self.vx = -self.vx
+                self.sound.play()
             elif not pygame.sprite.spritecollideany(self, sliders).is_left and self.vx > 0:
                 self.vx = -self.vx
+                self.sound.play()
 
 
 class Border(pygame.sprite.Sprite):
-    # строго вертикальный или строго горизонтальный отрезок
     def __init__(self, x1, y1, x2, y2, is_slider, is_left):
         super().__init__(all_sprites)
-        if x1 == x2:  # вертикальная стенка
-            if is_slider:
+        if x1 == x2:
+            if is_slider:   # игрок
                 self.add(sliders)
                 self.image = pygame.Surface([1, y2 - y1])
                 self.rect = pygame.Rect(x1, y1, 1, y2 - y1)
                 self.is_left = is_left
-            else:
+            else:   # вертикальная стенка
                 self.add(vertical_borders)
                 self.image = pygame.Surface([1, y2 - y1])
                 self.rect = pygame.Rect(x1, y1, 1, y2 - y1)
                 self.is_left = is_left
-        else:  # горизонтальная стенка
+        else:   # горизонтальная стенка
             self.add(horizontal_borders)
             self.image = pygame.Surface([x2 - x1, 1])
             self.rect = pygame.Rect(x1, y1, x2 - x1, 1)
 
-    def up(self):
+    def up(self):   # перемещение вверх
         if self.rect.y > 0:
             self.rect = self.rect.move(0, -25)
         print(self.rect.y)
 
-    def dwn(self):
+    def dwn(self):   # перемещение вниз
         if self.rect.y < 900:
             self.rect = self.rect.move(0, 25)
         print(self.rect.y)
 
-    def ai(self, x, y):
+    def ai(self, x, y):   # поведение машины
         if x < 0:
             if y > 0:
                 self.dwn()
@@ -90,6 +96,7 @@ class Border(pygame.sprite.Sprite):
 
 
 def init():
+    menu.close()    # создание поля
     fps = 60
     clock = pygame.time.Clock()
     Border(5, 5, width - 5, 5, False, False)
@@ -99,12 +106,15 @@ def init():
     ball = Ball(20, 1025, 539)
     slider_l = Border(100, 450, 100, height - 450, True, True)
     slider_r = Border(width - 100, 450, width - 100, height - 450, True, False)
+    pygame.mixer.music.load('bg_sound2.mp3')
+    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.play(-1)
     f_up = f_dwn = False
     running = True
     return ball, slider_r, slider_l, f_up, f_dwn, running, fps, clock
 
 
-def start():
+def start():   # игра с машиной
     ball, slider_r, slider_l, f_up, f_dwn, running, fps, clock = init()
     ai = 0
     while running:
@@ -119,14 +129,14 @@ def start():
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_UP, pygame.K_DOWN]:
                     f_up = f_dwn = False
-        if f_up:
+        if f_up:   # движение игрока
             slider_r.up()
         elif f_dwn:
             slider_r.dwn()
         screen.fill('white')
         all_sprites.draw(screen)
         balls.update()
-        if ai == 2:
+        if ai == 2:   # движение машины
             ai = 0
             slider_l.ai(ball.vx, ball.vy)
         else:
@@ -136,7 +146,7 @@ def start():
     pygame.quit()
 
 
-def start_with_player(*args):
+def start_with_player(*args):   # игра с человеком
     ball, slider_r, slider_l, f_up, f_dwn, running, fps, clock = init()
     k_up = k_dwn = False
     while running:
@@ -181,10 +191,9 @@ if __name__ == '__main__':
     pygame.init()
     size = width, height = 2050, 1079
     screen = pygame.display.set_mode(size)
-    mytheme = pygame_menu.Theme(background_color=(255, 255, 255, 255), title_background_color=(255, 0, 0), title_font_shadow=True)
-    menu = pygame_menu.Menu('Welcome', 2050, 1079, theme=mytheme)
-    menu.add.button('', for_useless_button)
-    # эта кнопка не видна и ничего не делает, но без неё меню не работает
+    mytheme = pygame_menu.Theme(background_color=(255, 255, 255, 255), title_background_color=(255, 0, 0), title_font_shadow=True)      # Главное меню
+    menu = pygame_menu.Menu('Добро пожаловать', 2050, 1079, theme=mytheme)
+    menu.add.button('', for_useless_button)    # эта кнопка не видна и ничего не делает, но без неё меню не работает
     menu.add.button('Играть с машиной', start)
     menu.add.button('Играть с человеком', start_with_player)
     menu.add.button('Выход', pygame_menu.events.EXIT)
